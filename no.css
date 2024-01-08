@@ -1,0 +1,91 @@
+body {
+	--header-color: #dadada;
+	--h1-size: 1.802em;
+	--h2-size: 1.602em;
+	--h3-size: 1.424em;
+	--h4-size: 1.266em;
+	--h5-size: 1.125em;
+	--h6-size: 1em;
+}
+
+.cm-header-1 {
+  font-variant: var(--h1-variant);
+  letter-spacing: -0.015em;
+  line-height: var(--h1-line-height);
+  font-size: var(--h1-size);
+  color: var(--header-color);
+  font-weight: var(--h1-weight);
+  font-style: var(--h1-style);
+  font-family: var(--font-text);	
+  caret-color: #dadada;
+}
+
+.cm-header-2 {
+  font-variant: var(--h2-variant);
+  letter-spacing: -0.015em;
+  line-height: var(--h2-line-height);
+  font-size: var(--h2-size);
+  color: var(--header-color);
+  font-weight: var(--h2-weight);
+  font-style: var(--h2-style);
+  font-family: var(--font-text);	
+  caret-color: #dadada;
+  caret-shape: block;
+}
+
+.cm-header-3 {
+  font-variant: var(--h3-variant);
+  letter-spacing: -0.015em;
+  line-height: var(--h3-line-height);
+  font-size: var(--h3-size);
+  color: var(--header-color);
+  font-weight: var(--h3-weight);
+  font-style: var(--h3-style);
+  font-family: var(--font-text);	
+  caret-color: #dadada;
+  caret-shape: block;
+}
+
+.CodeMirror-line {
+	font-family: var(--font-text);
+}
+
+.CodeMirror-focused {
+	caret-color: #dadada;
+}
+
+.cm-bold {
+	font-family: var(--font-text);
+	font-weight: bold;
+}
+
+.cm-italic {
+	font-family: var(--font-text);
+	font-style: italic;
+}
+
+.cm-s-default {
+  	font-family: var(--font-text);	
+	padding: 16px;
+	caret-color: var(#dadada);
+}
+
+.CodeMirror-cursor {
+	display: block;
+  position: relative;
+  z-index: 3;
+  width: 2px;
+	background-color: #dadada;
+}
+
+.CodeMirror-focused .CodeMirror-selected { background: #d7d4f0; }
+
+.CodeMirror-measure {
+	visibility: hidden;
+}
+
+.CodeMirror pre {
+  white-space: pre-wrap;
+  word-break: break-all;
+  word-wrap: break-word;
+}

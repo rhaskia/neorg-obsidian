@@ -61,10 +61,12 @@ class NeorgView extends TextFileView {
         super(leaf);
         // @ts-ignore
         this.codeMirror = CodeMirror(this.extContentEl, {
-            showCursorWhenSelecting: true
+            showCursorWhenSelecting: true,
         });
 
         this.codeMirror.on("changes", this.changed);
+
+        this.codeMirror.setCursor(0, 0);
     }
 
     // When the view is resized, refresh CodeMirror (thanks Licat!).
