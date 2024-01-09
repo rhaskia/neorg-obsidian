@@ -2,15 +2,19 @@ import { Plugin, TextFileView, WorkspaceLeaf, MarkdownView } from "obsidian";
 import "./src/norg-parse.js";
 import "./lib/codemirror.js";
 import "./mode/simple/simple.js";
+//import "./tree-sitter-norg-main/bindings/node/index.js";
 
 import {
     ViewUpdate,
     PluginValue,
     EditorView,
     ViewPlugin,
+    WidgetType,
+    DecorationSet
 } from "@codemirror/view";
 
 import { vim } from "@replit/codemirror-vim";
+import CodeMirror from "./lib/codemirror.js";
 
 CodeMirror.defineSimpleMode("neorg", {
     start: [
@@ -24,7 +28,8 @@ CodeMirror.defineSimpleMode("neorg", {
         { regex: /\*(.*?)\*/, token: ["bold"] },
         { regex: /`([^`]+)`/, token: ["inline-code"] },
 
-        { regex: /^\s*- \( \)/, token: ["todo"], sol: true},
+        { regex: /^\s*- \( \)/, token: ["todo"], sol: true },
+        { regex: /^\s*- \(x\)/, token: ["todo"], sol: true },
 
     ],
 
@@ -43,7 +48,7 @@ export default class Neorg extends Plugin {
         this.registerExtensions(["norg"], "neorg");
 
         this.addRibbonIcon("plus", "New norg file", () => {
-            
+
         });
     }
 
@@ -63,6 +68,7 @@ export default class Neorg extends Plugin {
 class NeorgView extends TextFileView {
     // Internal code mirror instance:
     codeMirror: CodeMirror.Editor;
+    decorations: DecorationSet;
 
     // this.contentEl is not exposed, so cheat a bit.
     public get extContentEl(): HTMLElement {
@@ -79,16 +85,18 @@ class NeorgView extends TextFileView {
 
         this.codeMirror.on("changes", this.changed);
 
-        this.codeMirror.setCursor(0, 0);
+        //this.codeMirror.setCursor(0, 0);
     }
 
     // When the view is resized, refresh CodeMirror (thanks Licat!).
     onResize() {
         this.codeMirror.refresh();
+        this.reloadButtons();
     }
 
     changed = async () => {
         this.requestSave();
+        this.reloadButtons();
     };
 
     getViewData = () => {
@@ -105,7 +113,7 @@ class NeorgView extends TextFileView {
 
         // @ts-ignore
         //if (this.app?.vault?.config?.vimMode) {
-          //  this.codeMirror.setOption("keyMap", "vim");
+        //  this.codeMirror.setOption("keyMap", "vim");
         //}
 
         // This seems to fix some odd visual bugs:
@@ -114,7 +122,48 @@ class NeorgView extends TextFileView {
         // This focuses the editor, which is analogous to the
         // default Markdown behavior in Obsidian:
         this.codeMirror.focus();
+
+        this.reloadButtons();
     };
+
+    reloadButtons () {
+        const todoElements = this.contentEl.querySelectorAll('.todo');
+
+    // Remove each 'todo' element
+    todoElements.forEach(todoElement => {
+        todoElement.remove();
+    });
+
+        var rect = this.codeMirror.getWrapperElement().getBoundingClientRect();
+        var topVisibleLine = this.codeMirror.lineAtHeight(rect.top, "window");
+        var bottomVisibleLine = this.codeMirror.lineAtHeight(rect.bottom, "window");
+
+        for (let i = topVisibleLine; i < bottomVisibleLine; i++) {
+            let tokens = this.codeMirror.getLineTokens(i);
+            for (let j = 0; j < tokens.length; j++) {
+                if (tokens[j].type == "todo") { this.todoButton(tokens[j], i); }
+            }
+        } 
+    }
+
+    todoButton(token, line) {
+        let lines = this.contentEl.querySelector(".CodeMirror-lines");
+        if (lines) {
+            let button = lines.createEl("input");
+            button.type = "checkbox";
+            button.className = "todo";
+            const coords = this.codeMirror.charCoords({ line: line, ch: token.start }, 'local');
+            button.style.left = coords.left.toString() + "px";
+            button.style.top = coords.top.toString() + "px";
+            button.checked = token.string == "- (x)"; 
+            
+            let cm = this.codeMirror;
+            button.addEventListener('change', () => {
+                const newText = button.checked ? '- (x)' : '- ( )';
+                this.codeMirror.replaceRange(newText, { line: line, ch: token.start }, { line: line, ch: token.end });
+            });
+        }
+    }
 
     clear = () => {
         this.codeMirror.setValue("");
@@ -137,3 +186,22 @@ class NeorgView extends TextFileView {
         return "neorg";
     }
 }
+
+class CheckboxWidget extends WidgetType {
+    constructor(readonly checked: boolean) { super() }
+
+    eq(other: CheckboxWidget) { return other.checked == this.checked }
+
+    toDOM() {
+        let wrap = document.createElement("span")
+        wrap.setAttribute("aria-hidden", "true")
+        wrap.className = "cm-boolean-toggle"
+        let box = wrap.appendChild(document.createElement("input"))
+        box.type = "checkbox"
+        box.checked = this.checked
+        return wrap
+    }
+
+    ignoreEvent() { return false }
+}
+
