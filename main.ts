@@ -4,29 +4,34 @@ import "./lib/codemirror.js";
 import "./mode/simple/simple.js";
 
 import {
-  ViewUpdate,
-  PluginValue,
-  EditorView,
-  ViewPlugin,
+    ViewUpdate,
+    PluginValue,
+    EditorView,
+    ViewPlugin,
 } from "@codemirror/view";
 
+import { vim } from "@replit/codemirror-vim";
+
 CodeMirror.defineSimpleMode("neorg", {
-	start: [
-		{regex: /^\* .*$/, token: ["header-1", "header"], sol : true },
-		{regex: /^\*\* .*/, token: ["header-2", "header"], sol: true },
-		{regex: /^\*\*\* .*/, token: ["header-3", "header"], sol: true },
+    start: [
+        { regex: /^\* .*$/, token: ["header-1", "header"], sol: true },
+        { regex: /^\*\* .*/, token: ["header-2", "header"], sol: true },
+        { regex: /^\*\*\* .*/, token: ["header-3", "header"], sol: true },
 
-		{regex: /^\s*\~.*$/, token: ["list-item"], sol : true },
+        { regex: /^\s*\~.*$/, token: ["list-item"], sol: true },
 
-        {regex: "\/(.*?)\/", token: ["italic"]},
-        {regex: /\*(.*?)\*/, token: ["bold"]},
-        
-	],
+        { regex: "\/(.*?)\/", token: ["italic"] },
+        { regex: /\*(.*?)\*/, token: ["bold"] },
+        { regex: /`([^`]+)`/, token: ["inline-code"] },
 
-	env: [
-		{regex: /\#\+(?:(END|end))_[a-zA-Z]*/, token: "comment", next: "start", sol: true},
-		{regex: /.*/, token: "comment"}
-	]
+        { regex: /^\s*- \( \)/, token: ["todo"], sol: true},
+
+    ],
+
+    env: [
+        { regex: /\#\+(?:(END|end))_[a-zA-Z]*/, token: "comment", next: "start", sol: true },
+        { regex: /.*/, token: "comment" }
+    ]
 });
 
 export default class Neorg extends Plugin {
@@ -36,6 +41,14 @@ export default class Neorg extends Plugin {
 
         this.registerView("neorg", this.neorgViewCreator);
         this.registerExtensions(["norg"], "neorg");
+
+        this.addRibbonIcon("plus", "New norg file", () => {
+            
+        });
+    }
+
+    newNeorgFile() {
+        this.app.vault.create("untitled2.norg", "").then(file => this.app.workspace.getMostRecentLeaf()?.openFile(file));
     }
 
     neorgViewCreator = (leaf: WorkspaceLeaf) => {
@@ -91,9 +104,9 @@ class NeorgView extends TextFileView {
         }
 
         // @ts-ignore
-        if (this.app?.vault?.config?.vimMode) {
-            this.codeMirror.setOption("keyMap", "vim");
-        }
+        //if (this.app?.vault?.config?.vimMode) {
+          //  this.codeMirror.setOption("keyMap", "vim");
+        //}
 
         // This seems to fix some odd visual bugs:
         this.codeMirror.refresh();
@@ -117,7 +130,7 @@ class NeorgView extends TextFileView {
     }
 
     canAcceptExtension(extension: string) {
-        return extension === "norg" ;
+        return extension === "norg";
     }
 
     getViewType() {

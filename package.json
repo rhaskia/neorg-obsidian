@@ -23,6 +23,7 @@
 	},
 	"dependencies": {
 		"@codemirror/view": "github:codemirror/view",
+		"@replit/codemirror-vim": "^6.1.0",
 		"codemirror": "^6.0.1"
 	}
 }
