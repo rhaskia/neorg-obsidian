@@ -222,6 +222,8 @@
 
 .cm-todo {
   visibility: hidden;
+  display: inline-block;
+  width: 20px;
 }
 
 .cm-header-1 {
@@ -271,20 +273,17 @@
   top: -0.1em;
   vertical-align: middle;
   z-index: 4;
-}
-
-input[type=checkbox] {
+  margin: 05px 0px!important;
   -webkit-appearance: none;
   appearance: none;
   border-radius: var(--checkbox-radius);
   border: 1px solid var(--checkbox-border-color);
   flex-shrink: 0;
   padding: 0;
-  margin: 5px 10px;
   margin-inline-end: 6px;
   width: var(--checkbox-size);
   height: var(--checkbox-size);
-  position: absolute;
+  position: absolute!important;
   transition: box-shadow 0.15s ease-in-out;
 }
 
