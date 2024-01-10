@@ -5,15 +5,10 @@ import "./mode/simple/simple.js";
 //import "./tree-sitter-norg-main/bindings/node/index.js";
 
 import {
-    ViewUpdate,
-    PluginValue,
-    EditorView,
-    ViewPlugin,
     WidgetType,
     DecorationSet
 } from "@codemirror/view";
 
-import { vim } from "@replit/codemirror-vim";
 import CodeMirror from "./lib/codemirror.js";
 
 CodeMirror.defineSimpleMode("neorg", {
@@ -21,6 +16,7 @@ CodeMirror.defineSimpleMode("neorg", {
         { regex: /^\* .*$/, token: ["header-1", "header"], sol: true },
         { regex: /^\*\* .*/, token: ["header-2", "header"], sol: true },
         { regex: /^\*\*\* .*/, token: ["header-3", "header"], sol: true },
+        { regex: /^\*\*\*\* .*/, token: ["header-4", "header"], sol: true },
 
         { regex: /^\s*\~.*$/, token: ["list-item"], sol: true },
 
@@ -28,8 +24,9 @@ CodeMirror.defineSimpleMode("neorg", {
         { regex: /\*(.*?)\*/, token: ["bold"] },
         { regex: /`([^`]+)`/, token: ["inline-code"] },
 
-        { regex: /^\s*- \( \)/, token: ["todo"], sol: true },
-        { regex: /^\s*- \(x\)/, token: ["todo"], sol: true },
+        { regex: /^\s*- \( \)/, token: ["task todo"], sol: true },
+        { regex: /^\s*- \(-\)/, token: ["task pending"], sol: true },
+        { regex: /^\s*- \(x\)/, token: ["task done"], sol: true },
 
     ],
 
@@ -127,12 +124,12 @@ class NeorgView extends TextFileView {
     };
 
     reloadButtons () {
-        const todoElements = this.contentEl.querySelectorAll('.todo');
+        const todoElements = this.contentEl.querySelectorAll('.task');
 
-    // Remove each 'todo' element
-    todoElements.forEach(todoElement => {
-        todoElement.remove();
-    });
+        // Remove each 'todo' element
+        todoElements.forEach(todoElement => {
+            todoElement.remove();
+        });
 
         var rect = this.codeMirror.getWrapperElement().getBoundingClientRect();
         var topVisibleLine = this.codeMirror.lineAtHeight(rect.top, "window");
@@ -141,21 +138,23 @@ class NeorgView extends TextFileView {
         for (let i = topVisibleLine; i < bottomVisibleLine; i++) {
             let tokens = this.codeMirror.getLineTokens(i);
             for (let j = 0; j < tokens.length; j++) {
-                if (tokens[j].type == "todo") { this.todoButton(tokens[j], i); }
+                if (tokens[j].type?.startsWith("task")) { this.todoButton(tokens[j], i); }
             }
         } 
     }
 
     todoButton(token, line) {
         let lines = this.contentEl.querySelector(".CodeMirror-lines");
+
         if (lines) {
             let button = lines.createEl("input");
             button.type = "checkbox";
-            button.className = "todo";
+            button.className = token.type;
             const coords = this.codeMirror.charCoords({ line: line, ch: token.start }, 'local');
             button.style.left = coords.left.toString() + "px";
             button.style.top = coords.top.toString() + "px";
-            button.checked = token.string == "- (x)"; 
+            console.log(token.type);
+            button.checked = token.type == "task done"; 
             
             let cm = this.codeMirror;
             button.addEventListener('change', () => {

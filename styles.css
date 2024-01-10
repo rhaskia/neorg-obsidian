@@ -220,7 +220,7 @@
   font-style: italic;
 }
 
-.cm-todo {
+.cm-task {
   visibility: hidden;
   display: inline-block;
   width: 20px;
@@ -269,7 +269,7 @@
   -webkit-box-decoration-break: clone;
 }
 
-.todo {
+.task {
   top: -0.1em;
   vertical-align: middle;
   z-index: 4;
@@ -285,6 +285,27 @@
   height: var(--checkbox-size);
   position: absolute!important;
   transition: box-shadow 0.15s ease-in-out;
+}
+
+.pending {
+  background-color: var(--color-base-40)!important;
+  border-color: var(--color-base-40)!important;
+}
+
+.pending::after {
+  content: "";
+  top: -1px;
+  left: -1px;
+  position: absolute;
+  width: var(--checkbox-size);
+  height: var(--checkbox-size);
+  display: block;
+  background-color: var(--color-base-100);
+  -webkit-mask-position: 45% 45%;
+  -webkit-mask-size: 80%;
+  -webkit-mask-composite: source-over;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="%23e8e8e8"><path d="M12 7V12L13.5 14.5M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z" stroke="%23000000" stroke-width="1.992" stroke-linecap="round" stroke-linejoin="round"/></svg>');
 }
 
 .cm-invalidchar {
