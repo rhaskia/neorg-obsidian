@@ -17,6 +17,7 @@ CodeMirror.defineSimpleMode("neorg", {
         { regex: /^\*\* .*/, token: ["header-2", "header"], sol: true },
         { regex: /^\*\*\* .*/, token: ["header-3", "header"], sol: true },
         { regex: /^\*\*\*\* .*/, token: ["header-4", "header"], sol: true },
+        { regex: /^\*\*\*\*\* .*/, token: ["header-5", "header"], sol: true },
 
         { regex: /^\s*\~.*$/, token: ["list-item"], sol: true },
 
@@ -44,13 +45,12 @@ export default class Neorg extends Plugin {
         this.registerView("neorg", this.neorgViewCreator);
         this.registerExtensions(["norg"], "neorg");
 
-        this.addRibbonIcon("plus", "New norg file", () => {
-
-        });
+        this.addRibbonIcon("plus", "New norg file", () => { 
+			this.app.vault.create("untitled.norg", "").then(file => this.app.workspace.getMostRecentLeaf()?.openFile(file));
+		});
     }
 
     newNeorgFile() {
-        this.app.vault.create("untitled2.norg", "").then(file => this.app.workspace.getMostRecentLeaf()?.openFile(file));
     }
 
     neorgViewCreator = (leaf: WorkspaceLeaf) => {
